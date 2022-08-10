@@ -8,11 +8,11 @@ Packages `chrome-aws-lambda` and `puppeteer-core` and `puppeteer` should have ve
 
 ## Running locally
 
-> AWS_PROFILE=name SCREENSHOT_BUCKET=puppeteerless-public CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" npm run test
+> AWS_PROFILE=name S3_BUCKET=puppeteerless-public npm run test
 
 ## Deploying to AWS
 
-> AWS_PROFILE=name SCREENSHOT_BUCKET=puppeteerless-public CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" npm run deploy
+> AWS_PROFILE=name S3_BUCKET=puppeteerless-public npm run deploy
 
 ## Links
 

@@ -7,7 +7,7 @@ provider:
   lambdaHashingVersion: 20200924
   name: aws
   # FIXME: No support for Node 16 right now https://github.com/alixaxel/chrome-aws-lambda/pull/274
-  runtime: nodejs14.x
+  runtime: nodejs16.x
   region: eu-west-1
   stage: ${env:DEPLOY_STAGE, 'dev'}
   apiGateway:
@@ -22,8 +22,8 @@ provider:
   deploymentBucket:
     blockPublicAccess: true
   environment:
-    S3_BUCKET: ${env:SCREENSHOT_BUCKET, ''}
-    S3_PREFIX: ${env:SCREENSHOT_BUCKET_PREFIX, ''}
+    S3_BUCKET: ${env:S3_BUCKET, ''}
+    S3_PREFIX: ${env:S3_PREFIX, ''}
     WAIT_ASYNC: 0
     LOG_VERBOSE: ${env:LOG_VERBOSE, 0}
   iam:
@@ -36,7 +36,7 @@ provider:
             Fn::Join:
               - ""
               - - "arn:aws:s3:::"
-                - ${env:SCREENSHOT_BUCKET, ''}
+                - ${env:S3_BUCKET, ''}
         - Effect: "Allow"
           Action:
             - "s3:PutObject"
@@ -46,7 +46,7 @@ provider:
             Fn::Join:
               - ""
               - - "arn:aws:s3:::"
-                - ${env:SCREENSHOT_BUCKET, ''}
+                - ${env:S3_BUCKET, ''}
                 - "/*"
 
 plugins:
@@ -54,14 +54,16 @@ plugins:
 
 custom:
   webpack:
+    excludeFiles: "**/.local-chromium/**"
     packagerOptions:
       noInstall: false
     includeModules:
       forceExclude:
         - aws-sdk
         - aws-lambda
-        - chrome-aws-lambda
         - puppeteer
+        - chrome-aws-lambda
+        - "@sparticuz/chrome-aws-lambda"
 
 package:
   patterns:

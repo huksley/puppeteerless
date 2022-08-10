@@ -1,18 +1,17 @@
 import "source-map-support/register";
 import chromium from "chrome-aws-lambda";
 import AWS from "aws-sdk";
-
 import { APIGatewayEvent, Context } from "aws-lambda";
 import emulateTimezone from "chrome-aws-lambda/build/hooks/timezone";
 import fixOuterWidthHeight from "chrome-aws-lambda/build/hooks/window";
 import fixChrome from "chrome-aws-lambda/build/hooks/chrome";
+import { logger } from "../tools/logger";
 import * as fs from "fs";
 import * as path from "path";
-
-type VerboseConsole = Console & { verbose: (str: string, ...any: unknown[]) => void };
-const logger: VerboseConsole = console as unknown as VerboseConsole;
-/* eslint-disable @typescript-eslint/no-empty-function */
-logger.verbose = process.env.LOG_VERBOSE === "1" ? logger.info : () => {};
+import { adblock } from "./adblock";
+import { scrollFullPage, wait } from "./scroll";
+import { waitImages } from "./waitImages";
+import { fullScreenshot } from "./fullScreenshot";
 
 /** Creates a Base64-encoded ASCII string from a binary string */
 export const btoa = (s: string) => Buffer.from(s, "binary").toString("base64");
@@ -31,7 +30,7 @@ export interface ScreenshotResponse extends ScreenshotRequest {
 }
 
 const takeScreenshot = async (request: ScreenshotRequest): Promise<ScreenshotResponse> => {
-  let url = new URL(request.url || "https://google.com/search?q=puppeteer");
+  let url = new URL(request.url || "https://nytimes.com");
 
   // Load fonts
   const fontsDir = process.env.IS_LOCAL
@@ -41,68 +40,131 @@ const takeScreenshot = async (request: ScreenshotRequest): Promise<ScreenshotRes
   logger.info("Loading fonts", fonts);
   await Promise.all(fonts.map(name => chromium.font(path.resolve(fontsDir, name))));
 
-  const executable = process.env.CHROME || (await chromium.executablePath);
+  const width = 1280;
+  const height = 768;
+  const executable = await chromium.executablePath;
   const args = chromium.args;
   logger.info("Launching Chrome", executable, "args", args);
   const browser = await chromium.puppeteer.launch({
     executablePath: executable,
     args,
-    defaultViewport: { width: 1280, height: 768 },
+    defaultViewport: { width, height },
     headless: chromium.headless,
     ignoreHTTPSErrors: true
   });
 
-  logger.verbose("Opening new page");
-  const page = await browser.newPage(emulateTimezone, fixOuterWidthHeight, fixChrome);
-
-  page.on("console", msg => {
-    msg.args().forEach((arg, i) => logger.info("Console log", i, String(arg)));
-  });
-
-  logger.info("Opening url", url.toString());
-  await page.goto(url.toString(), { timeout: 3000, waitUntil: "networkidle2" });
-
-  let buffer = null;
   try {
-    logger.info("Taking screenshot", url.toString());
-    buffer = (await page.screenshot()) as Buffer;
-  } catch (e) {
-    logger.warn("Failed to get screenshot", e?.message || String(e), e);
+    logger.verbose("Opening new page");
+    const page = await browser.newPage(
+      emulateTimezone,
+      fixOuterWidthHeight,
+      fixChrome,
+      adblock([])
+    );
+
+    page.on("console", msg => {
+      msg.args().forEach((arg, i) => logger.info("Console log", i, String(arg)));
+    });
+
+    logger.info("Opening url", url.toString());
+    await page.goto(url.toString(), { timeout: 15000, waitUntil: "networkidle2" });
+
+    const fullHeight = await scrollFullPage(page);
+    await waitImages(page);
+    if (page.waitForInflightRequests) {
+      await page.waitForInflightRequests(0, 500, 500, {
+        timeout: 3000
+      });
+    }
+
+    const scale = await page.evaluate(height => {
+      const body = document.body;
+      // Scale whole body to fit to height of view port
+      const scale = (height * 1.0) / document.body.scrollHeight;
+      body.style.transform = "scale(" + scale + ")";
+      body.style.transformOrigin = "0 0";
+      return scale;
+    }, height);
+
+    await page.evaluate(() => {
+      const body = document.body;
+      body.style.transform = "";
+    });
+    const fullPage = true;
+
+    let buffer: Buffer | undefined = undefined; // await fullScreenshot(page);
+    if (true) {
+      let attempts = 0;
+      while (attempts < 2) {
+        try {
+          //logger.info("Taking screenshot", url.toString(), "full height", fullHeight);
+          //await page.setViewport({ width, height: fullHeight });
+          buffer = (await page.screenshot(
+            fullPage
+              ? {
+                  fullPage: true
+                }
+              : {
+                  clip: {
+                    x: 0,
+                    y: 0,
+                    width: width * scale,
+                    height
+                  },
+                  fullPage: false,
+                  captureBeyondViewport: false
+                }
+          )) as Buffer;
+          break;
+        } catch (e) {
+          logger.warn("Failed to get screenshot", e?.message || String(e), e);
+          attempts++;
+        }
+      }
+    }
+
+    let title = await page.title();
+    let screenshotUrl = undefined;
+    const bucket = process.env.S3_BUCKET;
+    if (buffer && bucket) {
+      logger.info("Uploading to S3, title", '"' + title + '"');
+      const s3result = await s3
+        .upload({
+          Bucket: bucket,
+          Key:
+            (process.env.S3_PREFIX ? process.env.S3_PREFIX + "/" : "") +
+            new Date().getFullYear() +
+            "/" +
+            Date.now() +
+            ".png",
+          Body: buffer,
+          ContentType: "image/png",
+          ACL: "public-read",
+          CacheControl: "public, max-age=" + 365 * 24 * 60 * 60 + ", immutable"
+        })
+        .promise();
+
+      screenshotUrl = s3result.Location;
+      logger.info("Uploaded S3 file", screenshotUrl);
+    }
+
+    const response: ScreenshotResponse = {
+      ...request,
+      message: buffer ? "Screenshot taken" : "Failed to get screenshot",
+      screenshotUrl,
+      title,
+      browser: await page.browser().version()
+    };
+
+    await page.close();
+    await browser.close();
+    logger.info("Returning", response);
+    return response;
+  } catch (err) {
+    logger.warn("Screenshot failed", err?.mesage || String(err));
+    await browser.close();
+    throw err;
   }
-
-  let title = await page.title();
-  let screenshotUrl = undefined;
-  const bucket = process.env.S3_BUCKET;
-  if (buffer && bucket) {
-    logger.info("Uploading to S3, title", '"' + title + '"');
-    const s3result = await s3
-      .upload({
-        Bucket: bucket,
-        Key: (process.env.S3_PREFIX || "") + Date.now() + ".png",
-        Body: buffer,
-        ContentType: "image/png",
-        ACL: "public-read",
-        CacheControl: "public, max-age=" + 365 * 24 * 60 * 60 + ", immutable"
-      })
-      .promise();
-
-    screenshotUrl = s3result.Location;
-    logger.info("Uploaded S3 file", screenshotUrl);
-  }
-
-  const response: ScreenshotResponse = {
-    ...request,
-    message: buffer ? "Screenshot taken" : "Failed to get screenshot",
-    screenshotUrl,
-    title,
-    browser: await page.browser().version()
-  };
-
-  await page.close();
-  await browser.close();
-
-  logger.info("Returning", response);
-  return response;
 };
 
 export const serverless = async (
