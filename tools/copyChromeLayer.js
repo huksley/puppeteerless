@@ -49,9 +49,11 @@ const createChromeLayer = rootDir => {
   deleteFolderSync(dir);
   fs.mkdirSync(dir, { recursive: true });
 
-  const module = Object.keys(
-    JSON.parse(fs.readFileSync(path.resolve(rootDir, "package.json"))).dependencies
-  ).find(key => key.endsWith("chrome-aws-lambda"));
+  const package = JSON.parse(fs.readFileSync(path.resolve(rootDir, "package.json")));
+  const module = [
+    ...Object.keys(package.dependencies || {}),
+    ...Object.keys(package.devDependencies || {})
+  ].find(key => key.endsWith("chrome-aws-lambda"));
 
   logger.info("Packing as layer", module);
   copyModule(path.resolve(rootDir, "node_modules", module), path.resolve(dir, module));
@@ -133,3 +135,7 @@ const deleteFolderSync = removePath => {
 };
 
 exports.createChromeLayer = createChromeLayer;
+
+if (require.main === module) {
+  createChromeLayer(path.resolve(__dirname, ".."));
+}

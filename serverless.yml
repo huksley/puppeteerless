@@ -54,7 +54,6 @@ plugins:
 
 custom:
   webpack:
-    excludeFiles: "**/.local-chromium/**"
     packagerOptions:
       noInstall: false
     includeModules:

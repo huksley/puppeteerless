@@ -27,3 +27,7 @@ const downloadFonts = async rootDir => {
 };
 
 exports.downloadFonts = downloadFonts;
+
+if (require.main === module) {
+  downloadFonts(path.resolve(__dirname, ".."));
+}
