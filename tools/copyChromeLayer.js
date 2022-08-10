@@ -44,7 +44,7 @@ const copyFolderRecursiveSync = (source, target, reader) => {
 };
 
 /** Create layer with Chrome and dependencies */
-const createChromeLayer = rootDir => {
+const copyChromeLayer = rootDir => {
   const dir = path.resolve(rootDir, "layers/chrome-aws-lambda/nodejs/node_modules");
   deleteFolderSync(dir);
   fs.mkdirSync(dir, { recursive: true });
@@ -134,8 +134,8 @@ const deleteFolderSync = removePath => {
   }
 };
 
-exports.createChromeLayer = createChromeLayer;
+exports.copyChromeLayer = copyChromeLayer;
 
 if (require.main === module) {
-  createChromeLayer(path.resolve(__dirname, ".."));
+  copyChromeLayer(path.resolve(__dirname, ".."));
 }

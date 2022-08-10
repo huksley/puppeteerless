@@ -50,19 +50,18 @@ provider:
                 - "/*"
 
 plugins:
-  - serverless-webpack
+  - serverless-esbuild
 
 custom:
-  webpack:
-    packagerOptions:
-      noInstall: false
-    includeModules:
-      forceExclude:
-        - aws-sdk
-        - aws-lambda
-        - puppeteer
-        - chrome-aws-lambda
-        - "@sparticuz/chrome-aws-lambda"
+  esbuild:
+    sourcemap: true
+    external:
+      - "chrome-aws-lambda"
+    exclude:
+      - "aws-sdk"
+      - "puppeteer"
+      - "chrome-aws-lambda"
+      - "@sparticuz/chrome-aws-lambda"
 
 package:
   patterns:
