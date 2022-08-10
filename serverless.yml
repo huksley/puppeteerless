@@ -1,0 +1,91 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/huksley/json-schema/master/serverless/reference.json
+service: puppeteerless
+configValidationMode: warn
+frameworkVersion: "3"
+
+provider:
+  lambdaHashingVersion: 20200924
+  name: aws
+  # FIXME: No support for Node 16 right now https://github.com/alixaxel/chrome-aws-lambda/pull/274
+  runtime: nodejs14.x
+  region: eu-west-1
+  stage: ${env:DEPLOY_STAGE, 'dev'}
+  apiGateway:
+    shouldStartNameWithService: true
+  logRetentionInDays: 30
+  # optional, in MB, default is 1024, min is 128
+  memorySize: 4096
+  # optional, in seconds, default is 6
+  timeout: 600
+  # optional, default is true
+  versionFunctions: false
+  deploymentBucket:
+    blockPublicAccess: true
+  environment:
+    S3_BUCKET: ${env:SCREENSHOT_BUCKET, ''}
+    S3_PREFIX: ${env:SCREENSHOT_BUCKET_PREFIX, ''}
+    WAIT_ASYNC: 0
+    LOG_VERBOSE: ${env:LOG_VERBOSE, 0}
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - "s3:ListBucket"
+          Resource:
+            Fn::Join:
+              - ""
+              - - "arn:aws:s3:::"
+                - ${env:SCREENSHOT_BUCKET, ''}
+        - Effect: "Allow"
+          Action:
+            - "s3:PutObject"
+            - "s3:PutObjectAcl"
+            - "s3:GetObject"
+          Resource:
+            Fn::Join:
+              - ""
+              - - "arn:aws:s3:::"
+                - ${env:SCREENSHOT_BUCKET, ''}
+                - "/*"
+
+plugins:
+  - serverless-webpack
+
+custom:
+  webpack:
+    packagerOptions:
+      noInstall: false
+    includeModules:
+      forceExclude:
+        - aws-sdk
+        - aws-lambda
+        - chrome-aws-lambda
+        - puppeteer
+
+package:
+  patterns:
+    - "!README.md"
+    - "!.git/**"
+    - "!.github/**"
+    - "!.vscode/**"
+    - "!.gitignore"
+    - "!.babelrc"
+
+layers:
+  fonts:
+    # We load this font manually in src/index.ts
+    path: layers/fonts
+  chrome:
+    # Any packages here end up in /opt/nodejs/node_modules folder
+    # so it is can be used by NodeJS 
+    # See https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html#configuration-layers-path
+    path: layers/chrome-aws-lambda
+
+functions:
+  screenshot:
+    handler: src/index.serverless
+    url: true
+    layers:
+      - { Ref: ChromeLambdaLayer }
+      - { Ref: FontsLambdaLayer }

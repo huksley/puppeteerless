@@ -1,0 +1,8 @@
+{
+  "resource": "/",
+  "path": "/",
+  "httpMethod": "POST",
+  "body": {
+    "url": "https://theguardian.com"
+  }
+}
