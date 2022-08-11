@@ -7,7 +7,7 @@ provider:
   lambdaHashingVersion: 20200924
   name: aws
   # FIXME: No support for Node 16 right now https://github.com/alixaxel/chrome-aws-lambda/pull/274
-  runtime: nodejs16.x
+  runtime: nodejs14.x
   region: eu-west-1
   stage: ${env:DEPLOY_STAGE, 'dev'}
   apiGateway:
@@ -58,10 +58,10 @@ custom:
       noInstall: false
     includeModules:
       forceExclude:
-        - aws-sdk
-        - aws-lambda
-        - puppeteer
-        - chrome-aws-lambda
+        - "aws-sdk"
+        - "aws-lambda"
+        - "puppeteer"
+        - "chrome-aws-lambda"
         - "@sparticuz/chrome-aws-lambda"
 
 package:

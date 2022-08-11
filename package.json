@@ -8,8 +8,8 @@
   },
   "main": "src/index.js",
   "scripts": {
-    "package": "serverless package",
-    "deploy": "serverless deploy",
+    "package": "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1 serverless package",
+    "deploy": "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1 serverless deploy",
     "test": "serverless invoke local -f screenshot"
   },
   "dependencies": {
