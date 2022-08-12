@@ -1,3 +1,4 @@
 {
+  // Only used when building screenshot function
   "presets": ["next/babel"]
 }

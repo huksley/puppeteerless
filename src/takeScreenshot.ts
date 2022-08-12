@@ -1,8 +1,8 @@
 import "source-map-support/register";
 import chromium from "chrome-aws-lambda";
-import emulateTimezone from "chrome-aws-lambda/build/hooks/timezone";
-import fixOuterWidthHeight from "chrome-aws-lambda/build/hooks/window";
-import fixChrome from "chrome-aws-lambda/build/hooks/chrome";
+import { emulateTimezone } from "./hooks/emulateTimezone";
+import { fixOuterWidthHeight } from "./hooks/window";
+import { headfulChrome } from "./hooks/headful";
 import { logger } from "../tools/logger";
 import * as fs from "fs";
 import * as path from "path";
@@ -59,7 +59,7 @@ export const takeScreenshot = async (
     const page = await browser.newPage(
       emulateTimezone,
       fixOuterWidthHeight,
-      fixChrome,
+      headfulChrome,
       adblock([])
     );
 
