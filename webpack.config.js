@@ -1,7 +1,7 @@
 const path = require("path");
 const slsw = require("serverless-webpack");
 const nodeExternals = require("webpack-node-externals");
-const { createChromeLayer } = require("./tools/copyChromeLayer");
+const { copyChromeLayer } = require("./tools/copyChromeLayer");
 const { downloadFonts } = require("./tools/downloadFonts");
 const { logger } = require("./tools/logger");
 
@@ -35,7 +35,10 @@ module.exports = {
     rules: [
       {
         test: /\.(js|jsx|ts|tsx)$/,
-        loader: "babel-loader"
+        loader: "babel-loader",
+        options: {
+          configFile: path.resolve(__dirname, ".babelrc-serverless")
+        }
       }
     ]
   },
@@ -54,7 +57,7 @@ module.exports = {
           compiler.hooks.beforeCompile.tapAsync(
             "ChromeLambdaLayer",
             async (_params, callback) => {
-              createChromeLayer(__dirname);
+              copyChromeLayer(__dirname);
               return callback();
             }
           );
