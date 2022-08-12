@@ -27,37 +27,43 @@ const Screenshot = ({ story }: { story: Story }) => {
     >
       <h3
         style={{
-          display: "block",
+          display: "flex",
+          flexDirection: "column",
           height: "3em",
           textAlign: "center",
-          verticalAlign: "bottom"
+          justifyContent: "end",
+          marginBottom: "0.5em"
         }}
       >
-        <a href={"https://news.ycombinator.com/item?id=" + story.id}>
+        <a
+          href={story.url}
+          style={{
+            display: "inline-block"
+          }}
+        >
           <span>
             <b>{story.score}</b>
           </span>{" "}
-          {story.title} [{story.id}]
+          {story.title}
         </a>
       </h3>
 
       {url ? (
         <a href={story.url}>
-          <img src={url} width={350} height={Math.ceil(350 * Newspaper.Berliner)} />
+          <img src={url} width={360} height={Math.ceil(360 * Newspaper.Berliner)} />
         </a>
       ) : (
         <div
           style={{
             width: "360px",
-            padding: "10px",
-            height: Math.ceil(350 * Newspaper.Berliner) + "px",
+            height: Math.ceil(360 * Newspaper.Berliner) + "px",
             backgroundColor: "#ffffff"
           }}
         >
           Fetching image...
         </div>
       )}
-      <div style={{ padding: "10px" }}>
+      <div style={{ paddingTop: "0.5em" }}>
         <a
           href="#"
           onClick={event => {
@@ -89,9 +95,10 @@ interface Story {
 const Home: NextPage = () => {
   const [sites, setSites] = useState<Story[] | undefined>(undefined);
   const [max, setMax] = useState(20);
+  const [type, setType] = useState("top");
 
   useEffect(() => {
-    fetch("https://hacker-news.firebaseio.com/v0/topstories.json")
+    fetch("https://hacker-news.firebaseio.com/v0/" + type + "stories.json")
       .then(r => r.json())
       .then(json => {
         Promise.all(
@@ -104,7 +111,7 @@ const Home: NextPage = () => {
             )
         ).then(top => setSites(top.filter(s => s.url)));
       });
-  }, [setSites, max]);
+  }, [setSites, max, type]);
 
   return (
     <div
@@ -115,7 +122,50 @@ const Home: NextPage = () => {
         justifyContent: "center"
       }}
     >
-      <h2>Top {sites?.length} hackernews stories</h2>
+      <h2
+        style={{
+          marginTop: "0.5em",
+          marginBottom: "0.5em"
+        }}
+      >
+        {type} {sites?.length} hackernews stories
+      </h2>
+
+      <div
+        style={{
+          marginBottom: "2em"
+        }}
+      >
+        <a
+          href="#"
+          onClick={event => {
+            event?.preventDefault();
+            setType("top");
+          }}
+        >
+          top
+        </a>
+        {" | "}
+        <a
+          href="#"
+          onClick={event => {
+            event?.preventDefault();
+            setType("new");
+          }}
+        >
+          new
+        </a>
+        {" | "}
+        <a
+          href="#"
+          onClick={event => {
+            event?.preventDefault();
+            setType("best");
+          }}
+        >
+          best
+        </a>
+      </div>
 
       <div
         style={{

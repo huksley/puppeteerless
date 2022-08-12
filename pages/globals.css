@@ -13,8 +13,18 @@ a:hover {
   color: inherit;
   text-decoration: none;
   font-weight: normal;
-  outline: none;
-  user-select: none;
+  xoutline: none;
+  xuser-select: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  padding: 0;
+  margin: 0;
 }
 
 * {
