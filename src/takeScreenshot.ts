@@ -29,19 +29,11 @@ export interface ScreenshotResponse extends ScreenshotRequest {
   browser: string;
 }
 
-let browser: Browser | undefined = undefined;
-
-process.on("beforeExit", () => {
-  if (browser) {
-    logger.info("Closing browser");
-    browser.close();
-  }
-});
-
 export const takeScreenshot = async (
   request: ScreenshotRequest
 ): Promise<ScreenshotResponse> => {
   let url = new URL(request.url || "https://nytimes.com");
+  let browser: Browser | undefined = undefined;
   if (!browser) {
     // Load fonts
     const fontsDir = process.env.IS_LOCAL
@@ -157,12 +149,16 @@ export const takeScreenshot = async (
     };
 
     await page.close();
-    //await browser.close();
     logger.info("Returning", response);
     return response;
   } catch (err) {
     logger.warn("Screenshot failed", err?.mesage || String(err));
-    await browser.close();
     throw err;
+  } finally {
+    try {
+      browser.close();
+    } catch (e) {
+      logger.warn("Failed to close browser", e);
+    }
   }
 };

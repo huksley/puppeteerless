@@ -41,6 +41,18 @@ export const serverless = async (
   }
   logger.info("Got event", event);
 
+  // Also reply to CORS request
+  if (event?.requestContext?.http?.method === "OPTIONS") {
+    return {
+      body: "",
+      statusCode: 204,
+      isBase64Encoded: false,
+      headers: {
+        ...cors
+      }
+    };
+  }
+
   if (event?.requestContext?.http?.method === "GET" && !event?.queryStringParameters?.url) {
     const html = `<html>
   <head>

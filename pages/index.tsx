@@ -9,15 +9,13 @@ const Screenshot = ({ website }: { website: string }) => {
 
   useEffect(() => {
     fetch(
-      (process.env.NEXT_PUBLIC_SCREENSHOT_URL || "/api/screenshot") + "?refresh=" + refresh,
+      (process.env.NEXT_PUBLIC_SCREENSHOT_URL || "/api/cached") +
+        "?refresh=" +
+        refresh +
+        "&url=" +
+        encodeURIComponent(website),
       {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          url: website
-        })
+        method: "GET"
       }
     )
       .then(response => response.json())
