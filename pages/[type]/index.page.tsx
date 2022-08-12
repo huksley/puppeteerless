@@ -45,7 +45,7 @@ const Home: NextPage = () => {
 
   return (
     <div className="mx-8 mflex flex-col justify-center  md:mx-14 lg:mx-24">
-      <h2 className="text-lg pt-8">{type} hackernews stories</h2>
+      <h2 className="text-lg">{type} hackernews stories</h2>
       <div className="nav pb-8">
         <a
           href="#"
@@ -82,21 +82,23 @@ const Home: NextPage = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 justify-items-center">
-        {sites ? sites.map((story, index) => <Screenshot key={index} story={story} />) : null}
+        {sites ? sites.map(story => <Screenshot key={story.id} story={story} />) : null}
       </div>
 
-      <div className="nav pt-8">
-        <a
-          className=""
-          href="#"
-          onClick={event => {
-            event.preventDefault();
-            setMax(max + 10);
-          }}
-        >
-          Load more
-        </a>
-      </div>
+      {sites && sites.length > 0 ? (
+        <div className="nav pt-8">
+          <a
+            className={loading ? "loading" : ""}
+            href="#"
+            onClick={event => {
+              event.preventDefault();
+              setMax(max + 10);
+            }}
+          >
+            Load more
+          </a>
+        </div>
+      ) : null}
     </div>
   );
 };

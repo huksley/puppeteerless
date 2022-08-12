@@ -23,16 +23,11 @@ export const Screenshot = ({ story }: { story: Story }) => {
       </h3>
 
       {url ? (
-        <a
-          href={story.url}
-          className="inline-block border-4 border-slate-200 rounded-md border-solid"
-        >
-          <img src={url} className="w-350 aspect-[315/470]" />
+        <a href={story.url} className="inline-block">
+          <img src={url} className="w-350 aspect-[315/470] rounded-md" />
         </a>
       ) : (
-        /* 
-      height={Math.ceil(360 * Newspaper.Berliner)} */
-        <div className="border-4 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-md w-350 aspect-[315/470] border-slate-200 dark:border-slate-800 border-solid">
+        <div className="p-4 bg-slate-400 dark:bg-slate-900 text-slate-800 dark:text-slate-200 rounded-md w-350 aspect-[315/470]">
           Fetching image...
         </div>
       )}
