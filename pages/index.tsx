@@ -8,16 +8,9 @@ const Screenshot = ({ website }: { website: string }) => {
   const [refresh, setRefresh] = useState(1);
 
   useEffect(() => {
-    fetch(
-      (process.env.NEXT_PUBLIC_SCREENSHOT_URL || "/api/cached") +
-        "?refresh=" +
-        refresh +
-        "&url=" +
-        encodeURIComponent(website),
-      {
-        method: "GET"
-      }
-    )
+    fetch("/api/cached?refresh=" + refresh + "&url=" + encodeURIComponent(website), {
+      method: "GET"
+    })
       .then(response => response.json())
       .then(response => {
         setUrl(response.screenshotUrl);
