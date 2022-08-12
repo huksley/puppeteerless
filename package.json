@@ -19,14 +19,16 @@
   },
   "dependencies": {
     "@cliqz/adblocker-puppeteer": "^1.23.8",
+    "@huksley/request": "^1.0.9",
     "aws-sdk": "^2.1191.0",
     "chrome-aws-lambda": "^10.1.0",
+    "jedis": "^0.0.1",
     "jimp": "^0.16.1",
-    "node-fetch": "^2.6.7",
-    "source-map-support": "^0.5.21",
     "next": "12.2.4",
+    "node-fetch": "^2.6.7",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "source-map-support": "^0.5.21"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.102",
