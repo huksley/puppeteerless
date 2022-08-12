@@ -18,7 +18,7 @@ export const Screenshot = ({ story }: { story: Story }) => {
 
   return (
     <span>
-      <h3 className="h-14 grid-flow-col grid place-items-end justify-center pb-3 align-middle">
+      <h3 className="h-14 grid-flow-col grid overflow-hidden place-items-end justify-center pb-3 align-middle">
         <a href={story.url}>{story.title}</a>
       </h3>
 

@@ -29,7 +29,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       res.status(200).json(json);
     }, 500 + Math.random() * 500);
   } else {
-    logger.info("Query", url, "request", request);
+    logger.info("Query", url, "request", payload);
     const response = await request<{ screenshotUrl?: string }>(url, {
       method: "POST",
       headers: {

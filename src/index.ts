@@ -13,6 +13,7 @@ import { scrollFullPage, wait } from "./scroll";
 import { waitImages } from "./waitImages";
 import { fullScreenshot } from "./fullScreenshot";
 import { ScreenshotRequest, takeScreenshot } from "./takeScreenshot";
+import { screenshotBroadcast } from "./screenshotBroadcast";
 
 /** Creates a Base64-encoded ASCII string from a binary string */
 export const btoa = (s: string) => Buffer.from(s, "binary").toString("base64");
@@ -107,6 +108,7 @@ export const serverless = async (
 
   try {
     const response = await takeScreenshot(request);
+    await screenshotBroadcast(response);
     return {
       body: JSON.stringify(response),
       statusCode: 200,

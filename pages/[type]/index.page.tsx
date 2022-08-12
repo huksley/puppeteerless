@@ -4,6 +4,8 @@ import NextImage from "next/image";
 import { useRouter } from "next/router";
 import { Story } from "./Story";
 import { Screenshot } from "./Screenshot";
+import { useScreenshotBroadcast } from "./pusher";
+import { logger } from "../../tools/logger";
 
 const Home: NextPage = () => {
   const router = useRouter();
@@ -11,6 +13,10 @@ const Home: NextPage = () => {
   const [max, setMax] = useState(20);
   const type = router.query.type;
   const [loading, setLoading] = useState(false);
+
+  useScreenshotBroadcast(data => {
+    logger.info("data", data);
+  });
 
   const setType = useCallback(
     (type: string) => {

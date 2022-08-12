@@ -2,6 +2,7 @@
 service: puppeteerless
 configValidationMode: warn
 frameworkVersion: "3"
+useDotenv: true
 
 provider:
   lambdaHashingVersion: 20200924
@@ -24,6 +25,9 @@ provider:
   environment:
     S3_BUCKET: ${env:S3_BUCKET, ''}
     S3_PREFIX: ${env:S3_PREFIX, ''}
+    NEXT_PUBLIC_PUSHER_API_KEY: ${env:NEXT_PUBLIC_PUSHER_API_KEY, ''}
+    NEXT_PUBLIC_PUSHER_CHANNEL: ${env:NEXT_PUBLIC_PUSHER_CHANNEL, ''}
+    PUSHER_SECRET_KEY: ${env:PUSHER_SECRET_KEY, ''}
     WAIT_ASYNC: 0
     LOG_VERBOSE: ${env:LOG_VERBOSE, 0}
   iam:
