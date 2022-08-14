@@ -27,9 +27,11 @@ export const Screenshot = ({ story }: { story: Story }) => {
           <img src={url} className="w-350 aspect-[315/470] rounded-md" />
         </a>
       ) : (
-        <div className="p-4 bg-slate-400 dark:bg-slate-900 text-slate-800 dark:text-slate-200 rounded-md w-350 aspect-[315/470]">
-          Fetching image...
-        </div>
+        <a href={story.url} className="inline-block">
+          <div className="p-4 bg-slate-400 dark:bg-slate-900 text-slate-800 dark:text-slate-200 rounded-md w-350 aspect-[315/470]">
+            Fetching image...
+          </div>
+        </a>
       )}
 
       <div className="nav">
