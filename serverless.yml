@@ -76,6 +76,7 @@ package:
     - "!.vscode/**"
     - "!.gitignore"
     - "!.babelrc"
+    - "!node_modules/puppeteer/**"
 
 layers:
   fonts:
