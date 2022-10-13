@@ -83,6 +83,7 @@ package:
     - "!.gitignore"
     - "!.babelrc"
     - "!node_modules/puppeteer/**"
+    - "!node_modules/typescript/**"
 
 layers:
   fonts:
