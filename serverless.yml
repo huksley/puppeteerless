@@ -55,9 +55,11 @@ provider:
 
 plugins:
   - serverless-webpack
+  - serverless-scriptable-plugin
 
 custom:
   webpack:
+    keepOutputDirectory: true
     packagerOptions:
       noInstall: false
     includeModules:
@@ -67,6 +69,10 @@ custom:
         - "puppeteer"
         - "chrome-aws-lambda"
         - "@sparticuz/chrome-aws-lambda"
+  scriptable:
+    # add custom hooks
+    hooks:
+      after:package:createDeploymentArtifacts: 'find ./.serverless -name "*.zip" -exec zip --delete {} "node_modules/puppeteer/*" "node_modules/typescript/*" "node_modules/aws-sdk/*" \;'
 
 package:
   patterns:

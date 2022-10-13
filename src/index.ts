@@ -14,6 +14,7 @@ import { waitImages } from "./waitImages";
 import { fullScreenshot } from "./fullScreenshot";
 import { ScreenshotRequest, takeScreenshot } from "./takeScreenshot";
 import { screenshotBroadcast } from "./screenshotBroadcast";
+import {createIntl, createIntlCache} from '@formatjs/intl'
 
 /** Creates a Base64-encoded ASCII string from a binary string */
 export const btoa = (s: string) => Buffer.from(s, "binary").toString("base64");
@@ -25,6 +26,16 @@ const cors = {
   "Access-Control-Allow-Headers": "*",
   "Cache-Control": "no-cache, no-store, max-age=0"
 };
+
+
+const cache = createIntlCache()
+const intl = createIntl(
+  {
+    locale: 'fr-FR',
+    messages: {},
+  },
+  cache
+)
 
 export const serverless = async (
   event?: APIGatewayEvent & {
@@ -57,7 +68,10 @@ export const serverless = async (
   if (event?.requestContext?.http?.method === "GET" && !event?.queryStringParameters?.url) {
     const html = `<html>
   <head>
-  <title>Screenshot</title>
+  <title>${intl.formatMessage({
+    id: "TITLE", 
+    defaultMessage: "Screenshot"
+  })}</title>
   <link rel="stylesheet" type="text/css" href="https://githubraw.com/alvaromontoro/almond.css/master/dist/almond.css" />
   </head>
   <body>
